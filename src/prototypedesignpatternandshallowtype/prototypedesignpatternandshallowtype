@@ -1,0 +1,108 @@
+
+Prototype Design Pattern
+Definition
+    The Prototype Design Pattern is a creational pattern that allows you to create new objects by cloning an existing object instead of creating it from scratch.
+    This is useful when:
+        Object creation is costly (e.g., loading heavy data, establishing DB connection, etc.).
+        You want exact copies (shallow or deep).
+        You want to avoid rebuilding object state again and again.
+
+Your Example: NetworkConnection
+1. Prototype Class
+    public class NetworkConnection implements Cloneable {
+
+        private String ip;
+        private String importantDate;
+
+        public String getIp() { return ip; }
+        public void setIp(String ip) { this.ip = ip; }
+
+        public String getImportantDate() { return importantDate; }
+        public void setImportantDate(String importantDate) { this.importantDate = importantDate; }
+
+        // Simulating heavy object creation (5 seconds)
+        public void loadVeryImportantData(){
+            this.importantDate = "very very Important Data";
+            try {
+                Thread.sleep(5000); // heavy operation
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "NetworkConnection{" +
+                    "ip='" + ip + '\'' +
+                    ", importantDate='" + importantDate + '\'' +
+                    '}';
+        }
+
+        // Prototype method
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone(); // shallow copy
+        }
+    }
+
+Implements Cloneable → mandatory for clone()
+Overrides clone() → returns a copy of current object
+
+2. Client Code
+    public class NetworkMain {
+        public static void main(String[] args) throws CloneNotSupportedException {
+
+            // Step 1: Create heavy object
+            NetworkConnection networkConnection = new NetworkConnection();
+            networkConnection.setIp("192.168.4.4");
+            networkConnection.loadVeryImportantData(); // takes 5 sec
+            System.out.println(networkConnection);
+
+            // Step 2: Clone instead of creating again
+            NetworkConnection networkConnection2 = (NetworkConnection) networkConnection.clone();
+            networkConnection2.setIp("192.167.2.2");
+            System.out.println(networkConnection2);
+
+            // Step 3: Another clone (very fast, no 5 sec delay)
+            NetworkConnection networkConnection3 = (NetworkConnection) networkConnection.clone();
+            System.out.println(networkConnection3);
+        }
+    }
+
+Output (sample)
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data'}
+    NetworkConnection{ip='192.167.2.2', importantDate='very very Important Data'}
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data'}
+
+Key Points to Explain in Interview
+
+Why Prototype here?
+        Loading data (loadVeryImportantData()) is expensive (5 seconds).
+        Instead of rebuilding it for every object, we just clone.
+
+Shallow vs Deep Copy
+        Current code → shallow copy (because super.clone() only copies primitives & references).
+        If object had another object inside, we’d need deep copy (clone nested objects manually).
+
+When to Use
+        When object creation is expensive.
+        When you want to avoid repeating heavy initialization.
+        When you need multiple copies of an object with little modifications.
+
+Real-World Examples
+        Object.clone() in Java.
+        Prototype beans in Spring Framework.
+        Document editors (copy/paste objects).
+
+Advantages
+    Faster object creation.
+    Avoids costly initialization logic.
+    Can dynamically decide object type at runtime.
+
+Disadvantages
+    Must handle deep cloning manually if object has nested mutable objects.
+    Implementing Cloneable and overriding clone() properly is tricky.
+
+So in interview you can say:
+    “This code demonstrates Prototype Pattern because instead of creating new objects by calling constructors and reloading data,
+    we simply clone an already built object. This saves time and resources.”

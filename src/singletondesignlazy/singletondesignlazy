@@ -1,0 +1,60 @@
+
+What is Singleton Design Pattern?
+    Definition:
+    Singleton is a creational design pattern that ensures a class has only one object (instance) throughout the application and provides a global access point to it.
+
+    Goal:
+    Restrict object creation so that multiple objects are not created, saving memory and ensuring consistency.
+
+Key Points (Interview Ready)
+    | Feature              | Explanation                                                      |
+    | -------------------- | ---------------------------------------------------------------- |
+    | **Type**             | Creational Design Pattern                                        |
+    | **Instance**         | Only one object is created                                       |
+    | **Access**           | Global point to access the object                                |
+    | **Use Cases**        | Config classes, Logger, DB Connection, Cache, Thread Pools, etc. |
+    | **Memory Efficient** | Prevents creating multiple objects unnecessarily                 |
+
+Code Recap:
+    public class Bike {
+        private static Bike bike; // holds the single instance
+
+        private Bike() {} // private constructor
+
+        public static Bike getBike() {
+            if (bike == null) {
+                bike = new Bike(); // create object when first called
+            }
+            return bike;
+        }
+    }
+
+    Lazy Initialization: The Bike object is created only when getBike() is first called.
+    Private Constructor: Prevents creating objects using new Bike().
+    Single Instance: bike holds the only instance.
+    Global Access Point: Bike.getBike() gives access to the same object every time.
+
+Explanation in Simple Words
+    This is a Singleton Design Pattern because it ensures only one object of Bike exists in the application.
+    It's Lazy Initialization because the object is created when needed, not in advance.
+    Every time you call Bike.getBike(), you get the same object (proved by the same hashCode).
+    Saves memory and maintains a single point of control.
+
+Limitation
+code is not thread-safe:
+    If multiple threads call getBike() at the same time, more than one object could be created.
+
+How to Fix (Thread-Safe Version of Code)
+    public static synchronized Bike getBike() {
+        if (bike == null) {
+            bike = new Bike();
+        }
+        return bike;
+    }
+Adding synchronized ensures only one thread at a time can create the object.
+
+Interview-Style Answer (Based on Your Code)
+    “In this code, I’ve implemented a Singleton Design Pattern using lazy initialization.
+    The Bike class has a private constructor to prevent creating objects directly, and a static method getBike() that creates and returns the same instance every time.
+    This ensures that only one object of Bike exists in the application.
+    However, this version is not thread-safe; in a multi-threaded environment, we should make the method synchronized or use other techniques like Bill Pugh Singleton to ensure thread safety.”

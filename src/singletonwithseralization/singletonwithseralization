@@ -1,0 +1,133 @@
+
+1. What is Serialization and Deserialization in Java?
+    Serialization: Converting an object into a byte stream so it can be saved to a file or sent over a network.
+    Deserialization: Converting that byte stream back into an object.
+
+Classes must implement Serializable to enable this.
+
+Example:
+    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("abc.ob"));
+    oos.writeObject(object);  // Serialization
+    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("abc.ob"));
+    Object obj = ois.readObject();  // Deserialization
+
+2. How Serialization Breaks Singleton
+    In a typical singleton without readResolve():
+    You create a singleton object with Car.getCar().
+    You serialize it into a file.
+    You deserialize it back.
+    Deserialization creates a new object in memory, so now you have two different objects (singleton broken).
+
+Example output (if readResolve() not there):
+    car.hashCode()  -> 123456
+    car2.hashCode() -> 789012  // Different object created
+
+3. How Your Code Fixes It (readResolve)
+You added:
+    protected Object readResolve() {
+        return car;
+    }
+
+What this does:
+    During deserialization, instead of creating a new object, Java calls readResolve() and returns the already existing singleton instance.
+    This preserves the Singleton property.
+With your code, output is:
+    car.hashCode()  -> 123456
+    car2.hashCode() -> 123456  // Same object!
+So Serialization is NOT breaking Singleton here because of readResolve().
+
+Full Code Review (Your Code Explained)
+public class Car implements Serializable {
+    private static Car car;
+
+    private Car() {}
+
+    public static Car getCar() {
+        if (car == null) {
+            synchronized (Car.class) {
+                car = new Car();
+            }
+        }
+        return car;
+    }
+
+    protected Object readResolve() {
+        return car; // Return the same instance instead of creating a new one
+    }
+}
+    Serializable: Allows object to be converted into bytes.
+    readResolve(): Overrides default deserialization to return the singleton instance.
+    Thread safety: Synchronized block ensures safe lazy initialization.
+
+Interview Answer (Serialization + Singleton)
+    “Normally, serialization and deserialization can break a Singleton because deserialization creates a new instance of the class from the byte stream, violating the single-instance rule.
+    In my code, I used readResolve(), which is a special method in Java. When a serialized object is deserialized, readResolve() is called, and I return the same singleton instance.
+    This ensures that both the original and deserialized object are the same, preserving Singleton integrity.
+    So, with readResolve(), serialization does not break Singleton.
+    However, Enum Singletons are safer because they are inherently serialization- and reflection-proof without extra code.”
+
+Is This a Good Approach?
+    | Criteria                           | Class-Based Singleton + `readResolve()`         | Enum Singleton    |
+    | ---------------------------------- | ----------------------------------------------- | ----------------- |
+    | **Serialization Safety**           |  Safe because of `readResolve()`                |  Safe by default  |
+    | **Reflection Safety**              |  Can be broken via reflection (unless guarded)  |  Safe by default  |
+    | **Extra Code**                     | Needs `readResolve()`, guards                   | No extra code     |
+    | **Preferred for Critical Systems** | Not ideal, more error-prone                     |  Best practice    |
+
+Conclusion:
+    This works well and is interview-correct.
+    But Enum Singleton is simpler and safer: no need for readResolve() or reflection guards.
+
+Without readResolve() (Singleton Broken):
+       ┌───────────────┐
+       │ Singleton Obj │  ← created by getCar()
+       └───────┬───────┘
+               │
+               ▼
+     ┌─────────────────────┐
+     │ Serialization:      │
+     │ Write object to file│
+     └─────────┬───────────┘
+               │
+               ▼
+     ┌─────────────────────┐
+     │ Deserialization:    │
+     │ JVM creates a NEW   │
+     │ object from bytes   │
+     └─────────┬───────────┘
+               │
+               ▼
+       ┌───────────────┐
+       │ New Obj (diff)│  ← Different hashCode
+       └───────────────┘
+
+    Problem: Two different objects = Singleton broken.
+
+With readResolve() (Singleton Fixed)
+       ┌───────────────┐
+       │ Singleton Obj │  ← created by getCar()
+       └───────┬───────┘
+               │
+               ▼
+     ┌─────────────────────┐
+     │ Serialization:      │
+     │ Write object to file│
+     └─────────┬───────────┘
+               │
+               ▼
+     ┌─────────────────────┐
+     │ Deserialization:    │
+     │ JVM starts new obj, │
+     │ calls readResolve() │
+     └─────────┬───────────┘
+               │
+               ▼
+       ┌───────────────┐
+       │ Same Singleton│  ← Same hashCode returned
+       └───────────────┘
+
+    readResolve() ensures deserialization returns the existing instance, keeping Singleton safe.
+
+Quick Explanation to Say in Interview:
+    “Normally, deserialization creates a new object, breaking Singleton. By overriding readResolve(), I make sure that during deserialization,
+    the JVM doesn’t use the new object but instead returns the same Singleton instance. This preserves the Singleton property even with serialization and deserialization.”

@@ -1,0 +1,93 @@
+
+1. Definition of Factory Design Pattern
+    Factory Design Pattern is a Creational Design Pattern that provides an interface or method to create objects without exposing the creation logic to the client.
+    Instead of using new directly everywhere, you delegate object creation to a special method (Factory Method).
+    So, client code doesn’t worry about which class to instantiate.
+    The factory takes care of it.
+
+2. How Code Fits This Pattern
+    In the code:
+    Employee → An interface (common parent).
+    AndroidDeveloper & WebDeveloper → Concrete classes implementing Employee.
+    EmployeeFactory → A factory class with getEmployee() method to return the correct object based on input.
+    DeveloperMain → Client code using the factory, not creating objects directly.
+
+Flow:
+    DeveloperMain (client) → calls EmployeeFactory.getEmployee() → Factory creates correct Developer object
+    So, DeveloperMain doesn’t use new AndroidDeveloper() or new WebDeveloper() directly.
+
+3. Why Use Factory Pattern?
+    Encapsulation of Object Creation: The logic to decide which object to create is centralized inside the Factory.
+    Loose Coupling: Client code only depends on the Employee interface, not on concrete classes.
+    Scalability: Easy to add new types of Employees without changing much in client code.
+    Readability: Object creation logic is separated from usage logic.
+
+4. When to Use Factory Pattern
+    Use it when:
+    You have a superclass or interface and multiple implementations (like Employee).
+    You want to hide complex object creation logic from clients.
+    The exact class to create is determined at runtime (based on input or conditions).
+    You want to decouple object creation from usage.
+
+5. Detailed Example Analysis (Your Code)
+Interface:
+    public interface Employee {
+        int salary();
+    }
+
+    All employees must implement salary().
+    This is abstraction: clients can work with Employee without knowing the exact type.
+
+Concrete Classes:
+    public class AndroidDeveloper implements Employee {
+        @Override
+        public int salary() {
+            System.out.println("Getting Android Developer's Salary");
+            return 50000;
+        }
+    }
+
+    public class WebDeveloper implements Employee {
+        @Override
+        public int salary() {
+            System.out.println("Getting Web Developer's Salary");
+            return 40000;
+        }
+    }
+Two specific employees with different salary() logic.
+Clients should not directly create these.
+
+Factory Class:
+    public class EmployeeFactory {
+        public static Employee getEmployee(String empType) {
+            if (empType.trim().equalsIgnoreCase("ANDROID DEVELOPER")) {
+                return new AndroidDeveloper();
+            } else if (empType.trim().equalsIgnoreCase("WEB DEVELOPER")) {
+                return new WebDeveloper();
+            } else {
+                return null;
+            }
+        }
+    }
+getEmployee() hides the creation details.
+If a new employee type is added, only this method changes.
+
+Client:
+    public class DeveloperMain {
+        public static void main(String[] args) {
+            Employee webDeveloper = EmployeeFactory.getEmployee("Web Developer");
+            System.out.println(webDeveloper.salary());
+
+            Employee androidDeveloper = EmployeeFactory.getEmployee("Android Developer");
+            System.out.println(androidDeveloper.salary());
+        }
+    }
+The client never uses new to create objects.
+The client simply requests employees by name, and the factory gives the correct instance.
+
+6. Interview-Ready Answer
+    “The Factory Design Pattern is a creational design pattern that provides an interface or method for creating objects without specifying their concrete classes. In my example,
+    I created an Employee interface with multiple implementations like WebDeveloper and AndroidDeveloper.
+    The EmployeeFactory class has a getEmployee() method that decides which object to create based on input.
+    This pattern makes code loosely coupled, easier to maintain, and scalable. If we want to add a new employee type, we just modify the factory instead of changing client code.
+    It’s widely used in frameworks like Spring, Hibernate, JDBC (where DriverManager.getConnection() acts like a factory).”

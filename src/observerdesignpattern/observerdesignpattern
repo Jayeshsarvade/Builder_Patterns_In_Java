@@ -1,0 +1,157 @@
+
+1. What is the Observer Design Pattern?
+    The Observer Pattern is a behavioral design pattern where one object (Subject/Publisher) maintains a list of its dependents (Observers/Subscribers) and notifies them automatically of any state changes.
+    This is often described as a "one-to-many" relationship.
+
+Think:
+    A YouTube channel (Subject) notifies all Subscribers (Observers) when a new video is uploaded.
+
+2. Why Use Observer Pattern?
+    To decouple objects: The subject doesn’t need to know details of its subscribers; it just sends notifications.
+    Dynamic relationships: Subscribers can join or leave at runtime.
+    Used in event-driven systems, GUI frameworks, and message queues.
+
+3. Real-World Examples
+    YouTube notifications (your example)
+    Stock price updates in trading apps
+    Weather updates apps
+    Java’s built-in Observer and Observable classes (Deprecated now, but conceptually same)
+    Event listeners in Swing, JavaFX, Android, etc.
+
+4. Key Components in Your Code
+    YoutubeChannel → Subject / Publisher
+    Maintains a list of subscribers
+    Allows adding/removing subscribers (subscribe() and unSubscribe())
+    Notifies subscribers (newVideoUploaded())
+    Subscriber → Observer
+    Implements an update() method to get notifications.
+    Knows about the subject indirectly (gets info passed in notification).
+
+Typical Structure of Observer Pattern:
+            +--------------------+
+            |     Subject        |
+            |--------------------|
+            | + attach()         |
+            | + detach()         |
+            | + notifyObservers()|
+            +---------+----------+
+                      |
+                      |
+           +----------v-----------+
+           |       Observer       |
+           |----------------------|
+           | + update()           |
+           +----------+-----------+
+                      |
+          +-----------v-------------+
+          | ConcreteObserver (ex:   |
+          | Subscriber)             |
+          +-------------------------+
+
+
+5. How Your Code Works
+    A YoutubeChannel object is created (Publisher).
+    Multiple Subscriber objects (Observers) are created.
+    They subscribe to the YoutubeChannel.
+    When a new video is uploaded, the channel calls notifySubscribers(), which loops through the list and notifies each Subscriber.
+    Users can dynamically subscribe/unsubscribe.
+
+This is a perfect Observer pattern implementation.
+
+6. Example Implementation (Simplified for Interviews)
+    import java.util.ArrayList;
+    import java.util.List;
+
+    interface Observer {
+        void update(String videoTitle);
+    }
+
+    class Subscriber implements Observer {
+        private String name;
+        public Subscriber(String name) {
+            this.name = name;
+        }
+        @Override
+        public void update(String videoTitle) {
+            System.out.println(name + " got notification: New video uploaded - " + videoTitle);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Subscriber)) return false;
+            Subscriber other = (Subscriber) obj;
+            return this.name.equals(other.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+    }
+
+    class YoutubeChannel {
+        private List<Observer> subscribers = new ArrayList<>();
+
+        public void subscribe(Observer subscriber) {
+            subscribers.add(subscriber);
+            System.out.println("Subscriber added.");
+        }
+
+        public void unSubscribe(Observer subscriber) {
+            subscribers.remove(subscriber);
+            System.out.println("Subscriber removed.");
+        }
+
+        public void newVideoUploaded(String title) {
+            System.out.println("Video uploaded: " + title);
+            notifySubscribers(title);
+        }
+
+        private void notifySubscribers(String title) {
+            for (Observer sub : subscribers) {
+                sub.update(title);
+            }
+        }
+    }
+
+7. Advantages of Observer Pattern
+    Loose coupling (Publisher and Subscriber are not tightly dependent)
+    Easy to add/remove observers dynamically
+    Promotes Open/Closed Principle (new observers can be added without changing publisher code)
+    Great for event-driven architectures
+
+8. Disadvantages
+    Can cause memory leaks if observers are not unsubscribed properly (especially in GUI apps)
+    Notification to a large number of observers might affect performance
+    Harder to debug if notification chains are complex
+
+9. Observer Pattern in Java (Interview Points)
+    Java used to have java.util.Observer and java.util.Observable classes, but they’re deprecated now because they were not flexible (Observable was a class, not an interface).
+    Now, developers use custom interfaces like in your example or event systems (Spring Events, RxJava, etc.).
+
+    Widely used in MVC frameworks:
+        Model → Subject
+        View → Observer
+        Controller updates model, and View auto-updates.
+
+10. Interview Questions You May Face
+    | Question                                 | Short Answer                                                                                                               |
+    | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+    | What is Observer Pattern?                | A behavioral pattern where one object (Subject) notifies multiple observers automatically on state change.                 |
+    | Is it push or pull model?                | Usually **push** (subject pushes data), but can be implemented as **pull**.                                                |
+    | Difference between Observer and Pub-Sub? | Observer pattern has **direct reference** between subject and observers. Pub-Sub uses a **message broker** for decoupling. |
+    | Real-world examples?                     | YouTube notifications, Weather apps, Stock market apps, Event listeners in Java GUI.                                       |
+    | Why was `Observable` deprecated?         | It was a class, violating composition over inheritance. Better to use interfaces and custom implementations.               |
+    | Advantages/Disadvantages?                | Loose coupling, easy to extend; but can cause memory leaks and be hard to debug.                                           |
+
+
+Summary for Interview:
+    Observer Pattern = 1-to-many notification system.
+    Helps with loose coupling and dynamic relationships.
+    Real-world analogy: YouTube channel notifying subscribers.
+    Used in event systems, MVC, GUIs.
+    Your code is a perfect example:
+        YoutubeChannel → Subject
+        Subscriber → Observer
+        update() method → Notification

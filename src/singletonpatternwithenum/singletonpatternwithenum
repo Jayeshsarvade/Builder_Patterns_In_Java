@@ -1,0 +1,96 @@
+
+Code Recap:
+    public enum Car {
+        INSTANCE;
+
+        public void test() {
+            System.out.println("test tested");
+        }
+    }
+
+    public class Main {
+        public static void main(String[] args) {
+            Car car = Car.INSTANCE;
+            System.out.println(car.hashCode());
+            car.test();
+        }
+    }
+
+Output:
+    Always prints the same hashCode → proves only one object exists.
+
+Why Enum Singleton is the Best
+    1. Enum Prevents Reflection Attacks
+    Normally, reflection can break a singleton like this:
+    Constructor<Car> constructor = Car.class.getDeclaredConstructor();
+    constructor.setAccessible(true);
+    Car secondCar = constructor.newInstance();
+
+But with enum:
+    The JVM does not allow creating enum instances with newInstance() via reflection.
+    Attempting this throws:
+    java.lang.IllegalArgumentException: Cannot reflectively create enum objects
+    So reflection cannot break your enum singleton.
+
+2. Enum Prevents Serialization Issues
+    Serialization normally creates a new object when deserializing.
+    But with enums, Java ensures the same instance is returned.
+    No need to implement readResolve() like in class-based singletons.
+
+3. Enum is Thread-Safe by Default
+    Enum instances are created once per JVM when the enum is loaded.
+    No synchronization or double-checked locking needed.
+
+4. Enum is Simple & Clean
+    One line: Car.INSTANCE gives you your singleton.
+    No boilerplate code for constructor checks or synchronization.
+
+How Enum Singleton Works Internally
+    When you write:
+    public enum Car { INSTANCE; }
+
+The compiler generates something like:
+    public final class Car extends Enum<Car> {
+        public static final Car INSTANCE = new Car();
+
+        private Car() {
+            super("INSTANCE", 0);
+        }
+    }
+    Only one instance (INSTANCE) is created and stored in a static final field.
+    No way to use new or reflection to create more.
+
+Can Enum Singleton Be Broken?
+    Technically, no under normal Java runtime:
+        Reflection: Not allowed to create enum instances.
+        Serialization: Always returns the same instance.
+        Cloning: Not applicable because Enum doesn’t implement Cloneable.
+    The only ways to break it are:
+        Custom JVM bytecode manipulation (unsafe and out of scope for standard Java apps).
+        Using Unsafe class or JVM hacking (also out of scope for interviews).
+    So for interviews:
+    Say “Enum Singleton is 100% safe against reflection and serialization attacks in standard Java”.
+
+Interview-Ready Answer
+    “I implemented a Singleton using enum, which is considered the safest way in Java.
+    Enums provide implicit thread-safety and guarantee a single instance per JVM.
+    Unlike class-based singletons, enums cannot be instantiated through reflection because the JVM explicitly prevents reflective creation of enum objects.
+    They’re also serialization-proof: deserialization doesn’t create new objects, so there’s no need for a readResolve() method.
+    This makes enum singletons both concise and robust, recommended by Joshua Bloch in ‘Effective Java’.”
+
+Singleton Implementation Comparison
+    | Feature / Approach           | **Lazy Initialization** (Your `Bike`) | **Eager Initialization** (Your `Car`) | **Enum Singleton** (Your `Car.INSTANCE`)   |
+    | ---------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------------ |
+    | **When instance is created** | First time `getInstance()` is called  | At class loading time                 | At class loading time                      |
+    | **Thread Safety**            |  Not thread-safe (need sync)          |  Thread-safe by default               |  Thread-safe by default                    |
+    | **Performance**              |  Saves memory if never used           |  May waste memory if unused           |  No memory waste (like eager, but safe)    |
+    | **Reflection Attack**        |  Can be broken easily                 |  Can be broken easily                 |  JVM prevents reflective creation          |
+    | **Serialization Safety**     |  Needs `readResolve()` method         |  Needs `readResolve()` method         |  Safe by default                           |
+    | **Code Complexity**          | Moderate (needs sync, checks)         | Simple                                | Easiest (1 line: `INSTANCE`)               |
+    | **Recommended For**          | Objects created **rarely**            | Small, lightweight objects            | Critical singletons (Logger, Config, etc.) |
+    | **Example Access**           | `Bike.getBike()`                      | `Car.getCar()`                        | `Car.INSTANCE`                             |
+
+Key Takeaways:
+    Lazy Singleton: Best when object creation is heavy and might not always be needed. Needs careful thread handling.
+    Eager Singleton: Simple but may create objects unnecessarily.
+    Enum Singleton: Safest and easiest; prevents reflection and serialization attacks.

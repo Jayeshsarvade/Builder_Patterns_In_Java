@@ -1,0 +1,101 @@
+
+1. What is the Adapter Design Pattern?
+    The Adapter Pattern is a structural design pattern that allows objects with incompatible interfaces to work together by providing a wrapper (adapter).
+Think of it like a translator:
+    Your iPhone expects an Apple charger (Apple interface).
+    You only have an Android charger (Android interface).
+    The Adapter acts as a translator so your iPhone can charge using the Android charger.
+
+One-Liner Definition:
+    Adapter Pattern bridges the gap between two incompatible interfaces without changing their existing code.
+
+2. Real-World Analogy
+iPhone Charger Adapter:
+    iPhone has a Lightning port (Apple interface).
+    Android charger has a Type-C plug (Android interface).
+    You use an adapter that connects your Android charger to your iPhone.
+    So now your iPhone charges without changing the charger or the phone.
+
+This is exactly what your code demonstrates!
+
+3. Your Code in Pattern Terms
+    | Pattern Role         | Your Code Element                       | Explanation                                          |
+    | -------------------- | --------------------------------------- | ---------------------------------------------------- |
+    | **Target Interface** | `AppleCharger`                          | The interface your `Iphone13` expects.               |
+    | **Adaptee**          | `AndroidCharger` & `AndroidChargerImpl` | The class with an incompatible interface.            |
+    | **Adapter**          | `AdapterCharger`                        | The wrapper that translates calls.                   |
+    | **Client**           | `Iphone13` & `AdapterMain`              | The class that uses the adapter to charge the phone. |
+
+How It Works Step by Step:
+    Iphone13 expects an AppleCharger.
+    You only have AndroidChargerImpl.
+    AdapterCharger implements AppleCharger but internally uses AndroidCharger to do the actual charging.
+    The client (AdapterMain) creates an AdapterCharger with AndroidChargerImpl and gives it to the Iphone13.
+    Now your iPhone charges without knowing anything about Android chargers.
+
+4. UML Diagram
+            +--------------------+       +----------------------+
+            |    AppleCharger    |<------|    AdapterCharger    |
+            | (Target Interface) |       | (Adapter)            |
+            +--------------------+       +----------------------+
+                       ^                           |
+                       | implements                | has-a
+                       |                           v
+                +--------------+           +----------------------+
+                |   Iphone13   |           |   AndroidCharger     |
+                | (Client)     |           | (Adaptee Interface)  |
+                +--------------+           +----------------------+
+                                                   ^
+                                                   |
+                                          +-----------------------+
+                                          |   AndroidChargerImpl  |
+                                          +-----------------------+
+
+
+5. Types of Adapter Pattern
+There are two main ways to implement adapters:
+    1.Class Adapter (using inheritance):
+        Adapter extends the Adaptee class and implements the Target interface.
+        Limited because Java doesn’t support multiple inheritance.
+    2.Object Adapter (using composition):
+        Adapter has-a reference to Adaptee and delegates calls.
+        Your code uses this! (Preferred in Java)
+
+6. Advantages of Adapter Pattern
+    Reusability – Use existing classes without modifying them.
+    Flexibility – Add new adapters without touching client code.
+    Loose Coupling – Client only depends on Target interface, not Adaptee.
+    Open/Closed Principle – Extend behavior without modifying existing classes.
+
+7. Disadvantages
+    Can add extra complexity if overused.
+    If there are too many adapters, system becomes harder to manage.
+
+8. Where Adapter Pattern is Used in Java
+    Java I/O Streams:
+        InputStreamReader converts InputStream (byte stream) to Reader (character stream).
+        Reader reader = new InputStreamReader(new FileInputStream("file.txt"));
+
+This is exactly an adapter!
+Collections API:
+    Arrays.asList(array) adapts an array to a List.
+Legacy Code Integration:
+    Connecting old system interfaces to new system interfaces.
+
+9. Interview-Ready Key Points
+    | Question                 | Answer                                                                                                        |
+    | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+    | What is Adapter Pattern? | A structural pattern that allows incompatible interfaces to work together by using a wrapper class (Adapter). |
+    | Real-world analogy?      | iPhone adapter lets you use an Android charger for your iPhone.                                               |
+    | Class vs Object Adapter? | Class Adapter uses inheritance (less flexible), Object Adapter uses composition (more common in Java).        |
+    | Advantages?              | Reuse code, add flexibility, follows Open/Closed Principle.                                                   |
+    | Disadvantages?           | More classes, can make system complex.                                                                        |
+    | Example in Java?         | `InputStreamReader`, `Arrays.asList()`.                                                                       |
+
+10. TL;DR (Easy Explanation)
+    The Adapter Pattern is like a translator that lets two incompatible systems talk.
+    In your example:
+        Iphone13 expects AppleCharger.
+        You only have AndroidCharger.
+        AdapterCharger translates calls from iPhone to Android charger.
+    Goal: Achieve compatibility without modifying existing classes.

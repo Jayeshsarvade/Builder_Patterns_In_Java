@@ -1,0 +1,96 @@
+
+1. Definition of Builder Design Pattern
+    Builder Design Pattern is a Creational Design Pattern that lets you construct complex objects step by step.
+    It separates the construction of an object from its representation, allowing you to create immutable objects with many parameters in a clean and readable way.
+
+Instead of writing long constructors with too many parameters (Telescopic Constructors), Builder makes the code clean, flexible, and easy to read.
+
+2. Problem This Solves
+    Without Builder:
+    User user = new User("100", "Ram", "ram@gmail.com");
+
+    If you had 10+ fields, you’d need a long constructor or multiple constructors, which becomes confusing.
+    Builder solves this by letting you set fields step by step:
+    User user = new User.UserBuilder()
+                     .setUserId("100")
+                     .setUserName("Ram")
+                     .setEmailId("ram@gmail.com")
+                     .build();
+
+    More readable and flexible.
+    Object can be immutable (fields are final).
+
+3. How Your Code Fits This Pattern
+    | **Role**                           | **Your Code**                                             |
+    | ---------------------------------- | --------------------------------------------------------- |
+    | **Product Class (Complex Object)** | `User` class                                              |
+    | **Builder Class**                  | `UserBuilder` (static inner class inside `User`)          |
+    | **Builder Methods**                | `setUserId()`, `setUserName()`, `setEmailId()`, `build()` |
+    | **Client Code**                    | `UserMain` → builds `User` step by step                   |
+
+Code Flow:
+    Client calls new User.UserBuilder() or User.UserBuilder.builder().
+    Sets fields step by step.
+    Calls build() → returns a User object.
+    User constructor is private and uses values from the UserBuilder.
+
+4. Key Features of Builder Pattern
+    Immutable Object Creation: Once built, User is immutable because fields are final.
+    Readable Code: Named methods make it clear which fields you’re setting.
+    Flexible Object Construction: You can set only what you need, no need for all fields.
+    Encapsulation: User object’s creation logic is encapsulated inside the builder.
+
+5. Interview-Ready Explanation
+    “The Builder Design Pattern is a creational pattern used to create complex or immutable objects step by step. Instead of passing a long list of parameters to a constructor,
+    I use a static inner builder class with setter-like methods that return the builder itself. Finally, a build() method creates the object.
+    In my example, the User class has final fields and a private constructor. The static inner class UserBuilder allows setting fields using method chaining.
+    This makes the code more readable, flexible, and avoids telescopic constructors. Once built, the User object is immutable.
+    This pattern is widely used in frameworks like Spring, Lombok, and libraries like StringBuilder, and is perfect for creating objects with optional parameters.”
+
+6. Benefits
+    | **Benefits**                                  |
+    | --------------------------------------------- |
+    | Makes object creation more **readable**       |
+    | Avoids **telescoping constructors problem**   |
+    | Supports **immutable objects**                |
+    | Easier to **add or remove fields** later      |
+    | Supports **method chaining** for clean syntax |
+
+7. Drawbacks
+    | **Drawbacks**                                 |
+    | --------------------------------------------- |
+    | Slightly more code (extra builder class)      |
+    | Not useful for simple objects with 2–3 fields |
+
+Real-World Examples
+    StringBuilder in Java (append() → chain → toString()).
+    Lombok’s @Builder annotation automatically generates builder code.
+    Spring Framework Beans (Builder style for configuration).
+    Apache HttpClient or OkHttpClient uses Builder to configure HTTP requests.
+
+UML Diagram (Example)
+                    +---------------------+
+                    |        User         |
+                    +---------------------+
+                    | - userId: String    |
+                    | - userName: String  |
+                    | - emailId: String   |
+                    +---------------------+
+                    | + getters...        |
+                    +---------------------+
+                             ^
+                             |
+                    +---------------------+
+                    |   UserBuilder       |
+                    +---------------------+
+                    | - userId: String    |
+                    | - userName: String  |
+                    | - emailId: String   |
+                    +---------------------+
+                    | + setUserId()       |
+                    | + setUserName()     |
+                    | + setEmailId()      |
+                    | + build(): User     |
+                    +---------------------+
+
+    ClientMain --> Uses UserBuilder to build User step-by-step

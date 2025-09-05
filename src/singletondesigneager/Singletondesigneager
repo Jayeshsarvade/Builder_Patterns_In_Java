@@ -1,0 +1,54 @@
+
+Eager Initialization Singleton:
+    public class Car {
+        // Eagerly created singleton instance
+        private static final Car car = new Car();
+
+        // Private constructor prevents instantiation
+        private Car() {}
+
+        /**
+         * Returns the singleton instance of Car.
+         * @return the single Car instance
+         */
+        public static Car getCar() {
+            return car;
+        }
+    }
+
+    public class Main {
+        public static void main(String[] args){
+            Car car = Car.getCar();
+            System.out.println(car.hashCode());
+
+            Car car2 = Car.getCar();
+            System.out.println(car2.hashCode());
+        }
+    }
+
+Key Features (Eager Singleton)
+1. Instance is created at class loading time:
+        private static final Car car = new Car();private static final Car car = new Car();
+        As soon as Car class is loaded, the object is created.
+
+2. Private Constructor:
+    Prevents anyone from creating new objects with new Car().
+
+3. Single Instance:
+    getCar() always returns the same object.
+
+4. Thread-Safe by Default:
+    Because the object is created once at class loading, no thread-safety issues.
+
+Pros & Cons:
+    | Pros                                | Cons                                                 |
+    | ----------------------------------- | ---------------------------------------------------- |
+    | Simple to implement                 | Object is created even if not used                   |
+    | Thread-safe without synchronization | Might waste memory if object is large or rarely used |
+
+Interview-Style Answer
+    “This is a Singleton Design Pattern using Eager Initialization.
+    Here, the Car instance is created as soon as the class is loaded into memory.
+    The constructor is private to restrict direct object creation.
+    Since the instance is created upfront, it’s thread-safe by default.
+    However, the downside is that it might create the object even if it’s never used, which could waste resources.”

@@ -1,0 +1,66 @@
+
+1. What is Reflection API in Java?
+Definition:
+    The Java Reflection API (in java.lang.reflect package) allows you to inspect and manipulate classes, fields, constructors, and methods at runtime, even if they are private.
+
+Key Capabilities:
+    Inspect class info (methods, fields, constructors) at runtime.
+    Instantiate objects even with private constructors.
+    Call private methods.
+    Modify fields dynamically.
+
+2. How Reflection Broke Singleton
+Singleton class:
+    public class Car {
+        private static Car car;
+
+        private Car() {
+            if (car != null)
+                throw new RuntimeException("You are trying to break singleton design pattern");
+        }
+        public static Car getCar() {
+            if (car == null) {
+                synchronized (Car.class) {
+                    car = new Car();
+                }
+            }
+            return car;
+        }
+    }
+
+Reflection code:
+    Constructor<Car> declaredConstructor = Car.class.getDeclaredConstructor();
+    declaredConstructor.setAccessible(true); // bypass private access
+    System.out.println(declaredConstructor.newInstance().hashCode());
+
+What’s happening:
+    used Car.getCar() to create the first singleton object.
+    Then used declaredConstructor.setAccessible(true) to bypass private constructor access.
+    newInstance() created another Car object, breaking the Singleton guarantee.
+    Output will show two different hash codes, proving two different objects exist.
+
+3. How You Tried to Prevent Breaking
+    You wrote this in the constructor:
+    if (car != null)
+        throw new RuntimeException("You are trying to break singleton design pattern");
+
+    Idea: If the car instance already exists, throw an exception.
+    Problem:
+    Reflection bypasses normal constructor invocation rules; at the time of calling via reflection,
+    car is still null (because assignment happens later in getCar()), so the exception won’t always save you.
+
+4. How to Properly Prevent Reflection Breaking Singleton
+    Best Practice 1: Use Enum Singleton
+    public enum Singleton {
+        INSTANCE;
+    }
+    Enums in Java are reflection-proof (Reflection cannot create enum instances).
+    Safest and recommended by Effective Java (Joshua Bloch).
+
+Quick Interview Answer
+    “Reflection is a powerful API in Java that lets us inspect and modify classes at runtime, even private constructors and methods.
+    In Singleton, Reflection can break the pattern by allowing us to call the private constructor and create multiple instances.
+    In my code, I demonstrated this by using setAccessible(true) and newInstance() to create a second object of Car, even though the class is designed as a Singleton.
+    To protect against this, we can:
+        Use Enum Singleton (best choice as it’s reflection-proof and serialization-safe).
+        Or add a defensive flag check in the constructor to block multiple instantiations.”

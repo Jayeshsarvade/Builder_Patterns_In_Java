@@ -1,0 +1,106 @@
+
+1. What is Cloning in Java?
+    Cloning is the process of creating a copy of an object using the clone() method from the Object class.
+    To use cloning:
+        The class implements Cloneable.
+        Override clone() to allow copying.
+
+Example:
+    class Example implements Cloneable {
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
+        }
+    }
+
+2. How Cloning Breaks Singleton (Your Code)
+    Your Singleton class:
+    public class Car implements Cloneable {
+        private static Car car;
+
+        private Car() {}
+
+        public static Car getCar() {
+            if (car == null) {
+                synchronized (Car.class) {
+                    car = new Car();
+                }
+            }
+            return car;
+        }
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
+        }
+    }
+
+Main method:
+    Car c1 = Car.getCar();
+    Car c2 = (Car) c1.clone();  // Creates a new object!
+
+    System.out.println(c1.hashCode());
+    System.out.println(c2.hashCode());
+    System.out.println(c1 == c2);  // false
+
+What happens:
+    c1 is created via getCar() → Singleton object.
+    c2 is created via clone() → A new object is created in memory.
+    Output shows different hash codes.
+
+Singleton broken because now there are two instances.
+
+3. Why This Happens
+    The clone() method bypasses constructors entirely.
+    Even with a private constructor, cloning creates a new copy from memory, not by calling new.
+
+4. How to Prevent Cloning from Breaking Singleton
+    Option 1: Override clone() to Throw Exception
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedException("Singleton - Cloning not allowed");
+    }
+This makes sure nobody can clone your Singleton.
+
+Option 2: Return the Same Instance
+    If you want to allow cloning but still keep Singleton:
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return car;  // Always return the same instance
+    }
+
+Recommended Singleton Class (Cloning-Proof)
+    public class Car implements Cloneable {
+        private static Car car;
+
+        private Car() {}
+
+        public static Car getCar() {
+            if (car == null) {
+                synchronized (Car.class) {
+                    car = new Car();
+                }
+            }
+            return car;
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            throw new CloneNotSupportedException("Cloning is not allowed for Singleton");
+        }
+    }
+
+Quick Interview Answer
+    “Cloning breaks Singleton because clone() creates a new object without calling the constructor, bypassing Singleton restrictions. In my example,
+    I created two separate objects from a Singleton using clone(), and their hash codes prove they’re different.
+    To prevent this, override clone() to throw CloneNotSupportedException, or simply return the same Singleton instance from clone().
+    Another reason why Enum Singletons are preferred: they are inherently safe from cloning, serialization, and reflection attacks.”
+
+Summary Table (Breaking Singleton Methods)
+    | Breaking Technique | How It Breaks Singleton                        | How to Prevent It                                            |
+    | ------------------ | ---------------------------------------------- | ------------------------------------------------------------ |
+    | **Reflection**     | Calls private constructor                      | Throw exception in constructor / use Enum                    |
+    | **Serialization**  | Creates new object on deserialization          | Implement `readResolve()` / use Enum                         |
+    | **Cloning**        | `clone()` creates a copy bypassing constructor | Override `clone()` to throw exception / return same instance |
+
+
+

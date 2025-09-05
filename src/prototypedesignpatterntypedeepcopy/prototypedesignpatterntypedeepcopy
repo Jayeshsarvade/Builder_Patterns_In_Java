@@ -1,0 +1,61 @@
+
+What is Deep Cloning?
+    Cloning means creating a copy of an object.
+    In shallow cloning, only the top-level fields are copied. If an object has references (like a List, Map, or another object),
+    the cloned object will still point to the same reference → changes in one object affect the other.
+    In deep cloning, not only the object but also its nested objects / collections are copied → each object gets its own independent copy.
+
+In Your Example
+    You have a class NetworkConnection with:
+    String ip
+    String importantDate
+    List<String> domains
+
+    Now, Strings are immutable, so copying them is safe.
+    But domains (a List<String>) is mutable. If we do shallow copy, both original and cloned objects will share the same list.
+    That’s why you implemented deep copy.
+
+Clone Method Explanation
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        // create a fresh new object
+        NetworkConnection networkConnection = new NetworkConnection();
+        networkConnection.setIp(this.ip);  // copy primitive / immutable field
+        networkConnection.setImportantDate(this.importantDate);
+
+        // deep copy of the list
+        for (String domain: this.domains){
+            networkConnection.getDomains().add(domain);
+        }
+        return networkConnection;
+    }
+
+Key points:
+    Instead of just assigning networkConnection.setDomains(this.domains); (which would be shallow copy),
+    you iterate over the list and add each element separately.
+    This way, networkConnection.domains is a new list in memory, not the same one.
+    Now, changes in one object’s domains won’t affect the other.
+
+Behavior in NetworkMain
+    System.out.println(networkConnection);
+    networkConnection.getDomains().remove(1);  // remove facebook.com
+
+    System.out.println(networkConnection);  // facebook removed
+    System.out.println(networkConnection2); // still has facebook
+    System.out.println(networkConnection3); // still has facebook
+
+Because of deep cloning, networkConnection2 and networkConnection3 keep their independent copies of domains.
+If it was shallow clone, then removing "www.facebook.com" from one object would remove it from all objects.
+
+Output (example)
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data', domains=[www.google.com, www.facebook.com, www.amazon.com, www.uber.com]}
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data', domains=[www.google.com, www.amazon.com, www.uber.com]}
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data', domains=[www.google.com, www.facebook.com, www.amazon.com, www.uber.com]}
+    NetworkConnection{ip='192.168.4.4', importantDate='very very Important Data', domains=[www.google.com, www.facebook.com, www.amazon.com, www.uber.com]}
+
+Deep Cloning Pattern Summary
+    Clone method creates a fresh object.
+    Immutable fields (String, int, double, etc.) can be copied directly.
+    Mutable fields (List, Set, Map, custom objects) must be manually copied (or cloned themselves).
+    This ensures full independence between the original and cloned objects.
+

@@ -1,0 +1,61 @@
+
+Why Singleton for DB Connection?
+    We usually don’t want to create multiple DB connections unnecessarily (it’s expensive).
+    A Singleton ensures one shared connection instance is reused across the app.
+
+Code Example: Singleton DB Connection:
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.SQLException;
+
+    public class DatabaseConnection {
+
+        // Single instance of DatabaseConnection
+        private static DatabaseConnection instance;
+        private Connection connection;
+
+        // Private constructor
+        private DatabaseConnection() {
+            try {
+                String url = "jdbc:mysql://localhost:3306/mydb";
+                String username = "root";
+                String password = "password";
+                connection = DriverManager.getConnection(url, username, password);
+                System.out.println("Database connected!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Global access point
+        public static DatabaseConnection getInstance() {
+            if (instance == null) {
+                instance = new DatabaseConnection();
+            }
+            return instance;
+        }
+
+        // Getter for the connection
+        public Connection getConnection() {
+            return connection;
+        }
+    }
+
+How It Works:
+public class Main {
+    public static void main(String[] args) {
+        DatabaseConnection db1 = DatabaseConnection.getInstance();
+        DatabaseConnection db2 = DatabaseConnection.getInstance();
+
+        System.out.println(db1.getConnection());
+        System.out.println(db2.getConnection());
+        // Both print the same connection object
+    }
+}
+
+Key Points:
+    DatabaseConnection has a private constructor so no one can create objects directly.
+    The getInstance() method returns the same object every time.
+    Only one connection is established, saving resources.
+    Useful in enterprise apps where DB connections are expensive.
+
